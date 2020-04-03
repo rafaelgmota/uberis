@@ -4,17 +4,32 @@ import MapView, { Marker } from 'react-native-maps';
 import Search from '../Search';
 import Directions from '../Directions';
 import { getPixelSize } from '../../utils';
+import Geocoder from 'react-native-geocoding';
+import API_KEY from '../../config/apikey';
 
 import markerImage from '../../assets/marker.png'
+
+import { LocationBox, LocationText, LocationTimeBox, LocationTimeText, LocationTimeTextSmall } from './styles';
+
+Geocoder.init(API_KEY);
 
 export default function Map() {
   const [region, setRegion] = useState(null);
   const [destination, setDestination] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [duration, setDuration] = useState(null);
   const mapRef = useRef(null);
 
   useEffect( () => {
     navigator.geolocation.getCurrentPosition(
       ({ coords: {latitude, longitude} }) => {
+        Geocoder.from({ latitude, longitude })
+          .then(({ results }) => {
+            const address = results[0].formatted_address;
+            const location = address.substring(0, address.indexOf(','));
+            setLocation(location);
+          });
+
         setRegion({
           latitude,
           longitude,
@@ -52,6 +67,8 @@ export default function Map() {
               origin={region}
               destination={destination}
               onReady={result => {
+                setDuration(Math.floor(result.duration));
+
                 mapRef.current.fitToCoordinates(result.coordinates, {
                   edgePadding: {
                     right: getPixelSize(50),
@@ -62,7 +79,20 @@ export default function Map() {
                 });
               }}
             />
-            <Marker image={markerImage} coordinate={destination}  anchor={{ x: 0, y: 0 }}> 
+            <Marker image={markerImage} coordinate={destination}  anchor={{ x: 0, y: 0 }}>
+              <LocationBox>
+                <LocationText>{destination.title}</LocationText>
+              </LocationBox>
+            </Marker>
+
+            <Marker coordinate={region}  anchor={{ x: 0, y: 0 }}>
+              <LocationBox>
+                <LocationTimeBox>
+                  <LocationTimeText>{duration}</LocationTimeText>
+                  <LocationTimeTextSmall>Min</LocationTimeTextSmall>
+                </LocationTimeBox>
+                <LocationText>{location}</LocationText>
+              </LocationBox>
             </Marker>
           </Fragment>
            }
