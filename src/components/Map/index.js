@@ -5,6 +5,7 @@ import Search from '../Search';
 import Directions from '../Directions';
 import { getPixelSize } from '../../utils';
 import Geocoder from 'react-native-geocoding';
+import Details from '../Details';
 import API_KEY from '../../config/apikey';
 
 import markerImage from '../../assets/marker.png'
@@ -74,7 +75,7 @@ export default function Map() {
                     right: getPixelSize(50),
                     left: getPixelSize(50),
                     top: getPixelSize(50),
-                    bottom: getPixelSize(50),
+                    bottom: getPixelSize(350),
                   }
                 });
               }}
@@ -97,7 +98,7 @@ export default function Map() {
           </Fragment>
            }
       </MapView>
-      <Search onLocationSelected={handleLocationSelected}/>
+      { destination ? <Details/> :  <Search onLocationSelected={handleLocationSelected}/> }    
     </View>
   );
 }
